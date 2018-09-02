@@ -33,13 +33,15 @@ class Block:
                 self.transactions[i] = Transaction(**t)
 
 
+@dataclasses.dataclass
 class Blockchain:
 
-    def __init__(self):
-        self.chain = []
-        self.current_transations = []
-        self.nodes = set()
+    chain: typing.List[Block] = dataclasses.field(default_factory=list)
+    current_transations: typing.List[Transaction] = dataclasses.field(
+        default_factory=list)
+    nodes: typing.AbstractSet = dataclasses.field(default_factory=set)
 
+    def __post_init__(self):
         self.new_block(previous_hash=1, proof=100)
 
     @typechecked
