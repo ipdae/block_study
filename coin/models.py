@@ -27,6 +27,11 @@ class Block:
     proof: int
     previous_hash: typing.Union[int, str]
 
+    def __post_init__(self):
+        for i, t in enumerate(self.transactions):
+            if not isinstance(t, Transaction):
+                self.transactions[i] = Transaction(**t)
+
 
 class Blockchain:
 
