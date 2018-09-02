@@ -36,7 +36,7 @@ def test_mine(fx_wsgi_app: Flask):
 def test_new_transaction(fx_wsgi_app: Flask):
     with fx_wsgi_app.test_client() as client:
         blockchain = fx_wsgi_app.blockchain
-        assert blockchain.current_transations == []
+        assert blockchain.current_transactions == []
         res = client.post(
             '/transactions/new',
             data=json.dumps({
@@ -47,8 +47,8 @@ def test_new_transaction(fx_wsgi_app: Flask):
             content_type='application/json',
         )
         assert res.status_code == 201
-        assert len(blockchain.current_transations) == 1
-        transaction = blockchain.current_transations[-1]
+        assert len(blockchain.current_transactions) == 1
+        transaction = blockchain.current_transactions[-1]
         assert transaction.sender == 'sender'
         assert transaction.recipient == 'recipient'
         assert transaction.amount == 1000

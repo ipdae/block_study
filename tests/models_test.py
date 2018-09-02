@@ -19,7 +19,7 @@ def test_block_chain():
     assert block.transactions == []
     assert block.proof == 100
     assert block.previous_hash == 1
-    assert blockchain.current_transations == []
+    assert blockchain.current_transactions == []
     assert blockchain.nodes == set()
 
 
@@ -40,10 +40,10 @@ def test_new_block(fx_blockchain: Blockchain,
 def test_new_transaction(fx_blockchain: Blockchain):
     block = fx_blockchain.last_block
     assert block.index == 1
-    assert fx_blockchain.current_transations == []
+    assert fx_blockchain.current_transactions == []
     result = fx_blockchain.new_transaction('0', 'test', 1)
     assert result == 2
-    transaction = fx_blockchain.current_transations[0]
+    transaction = fx_blockchain.current_transactions[0]
     assert isinstance(transaction, Transaction)
     assert transaction.sender == '0'
     assert transaction.recipient == 'test'
@@ -87,7 +87,7 @@ def test_valid_chain(fx_blockchain: Blockchain):
 ])
 def test_valid_chain_invalid_hash(fx_blockchain: Blockchain,
                                   previous_hash: str):
-    block = Block(2, time.time(), fx_blockchain.current_transations, 10,
+    block = Block(2, time.time(), fx_blockchain.current_transactions, 10,
                   previous_hash)
     chain = fx_blockchain.chain
     chain.append(block)

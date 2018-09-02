@@ -37,7 +37,7 @@ class Block:
 class Blockchain:
 
     chain: typing.List[Block] = dataclasses.field(default_factory=list)
-    current_transations: typing.List[Transaction] = dataclasses.field(
+    current_transactions: typing.List[Transaction] = dataclasses.field(
         default_factory=list)
     nodes: typing.AbstractSet = dataclasses.field(default_factory=set)
 
@@ -52,11 +52,11 @@ class Blockchain:
         block = Block(
             len(self.chain) + 1,
             time.time(),
-            self.current_transations,
+            self.current_transactions,
             proof,
             previous_hash or self.hash(self.last_block)
         )
-        self.current_transations = []
+        self.current_transactions = []
         self.chain.append(block)
         return block
 
