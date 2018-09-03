@@ -4,10 +4,11 @@ import typing
 import unittest.mock
 import urllib.parse
 
-from pytest import mark
+from pytest import mark, raises
 from requests_mock import Mocker
 from typeguard import typechecked
 
+from coin.exc import InvalidTransactionError
 from coin.models import Block, Blockchain, Transaction
 
 
@@ -35,6 +36,14 @@ def test_new_block(fx_blockchain: Blockchain,
                    expected: typing.types):
     block = fx_blockchain.new_block(proof, previous_hash)
     assert isinstance(block.previous_hash, expected)
+
+
+def test_new_block_invalid_transaction(fx_blockchain: Blockchain):
+    r = raises(InvalidTransactionError)
+    m = unittest.mock.patch.object(Blockchain, 'valid_transaction',
+                                   return_value=False)
+    with r, m:
+        fx_blockchain.new_transaction('', '', 0)
 
 
 def test_new_transaction(fx_blockchain: Blockchain):
@@ -132,3 +141,12 @@ def test_resolve_conflicts_false(fx_blockchain: Blockchain, length: int,
             'chain': chain
         })
         assert fx_blockchain.resolve_conflicts() is False
+
+
+def test_valid_transaction(fx_blockchain: Blockchain):
+    fx_blockchain.new_transaction('0', 'test', 1)
+    transaction = fx_blockchain.current_transactions[0]
+    assert fx_blockchain.valid_transaction(transaction) is True
+
+    new = Transaction('sender', 'recipient', 10, transaction.timestamp - 1)
+    assert fx_blockchain.valid_transaction(new) is False

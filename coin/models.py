@@ -8,6 +8,8 @@ import urllib.parse
 from requests import get
 from typeguard import typechecked
 
+from .exc import InvalidTransactionError
+
 
 __all__ = 'Blockchain'
 
@@ -17,6 +19,7 @@ class Transaction:
     sender: str
     recipient: str
     amount: int
+    timestamp: float
 
 
 @dataclasses.dataclass
@@ -65,10 +68,13 @@ class Blockchain:
         transaction = Transaction(
             sender,
             recipient,
-            amount
+            amount,
+            time.time()
         )
-        self.current_transations.append(transaction)
-        return self.last_block.index + 1
+        if self.valid_transaction(transaction):
+            self.current_transactions.append(transaction)
+            return self.last_block.index + 1
+        raise InvalidTransactionError
 
     @staticmethod
     @typechecked
@@ -123,6 +129,17 @@ class Blockchain:
             current_index += 1
 
         return True
+
+    @typechecked
+    def valid_transaction(self, transaction: Transaction) -> bool:
+        if len(self.current_transactions) == 0:
+            return True
+        latest = self.current_transactions[-1]
+        if latest == transaction:
+            return True
+        elif latest.timestamp < transaction.timestamp:
+            return True
+        return False
 
     @typechecked
     def resolve_conflicts(self) -> bool:
