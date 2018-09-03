@@ -8,7 +8,7 @@ import urllib.parse
 from requests import get
 from typeguard import typechecked
 
-from .exc import InvalidTransactionError
+from .exc import InvalidBlockError, InvalidTransactionError
 
 
 __all__ = 'Blockchain'
@@ -59,9 +59,11 @@ class Blockchain:
             proof,
             previous_hash or self.hash(self.last_block)
         )
-        self.current_transactions = []
-        self.chain.append(block)
-        return block
+        if self.valid_block(block):
+            self.current_transactions = []
+            self.chain.append(block)
+            return block
+        raise InvalidBlockError
 
     @typechecked
     def new_transaction(self, sender: str, recipient: str, amount: int) -> int:
@@ -128,6 +130,19 @@ class Blockchain:
             last_block = block
             current_index += 1
 
+        return True
+
+    @typechecked
+    def valid_block(self, block: Block) -> bool:
+        try:
+            last_block = self.chain[-1]
+        except IndexError:
+            # genesis block
+            return True
+        if block.previous_hash != self.hash(last_block):
+            return False
+        if not self.valid_proof(last_block.proof, block.proof):
+            return False
         return True
 
     @typechecked

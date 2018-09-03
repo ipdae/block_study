@@ -34,7 +34,9 @@ def test_new_block(fx_blockchain: Blockchain,
                    proof: int,
                    previous_hash: typing.Union[str, int, None],
                    expected: typing.types):
-    block = fx_blockchain.new_block(proof, previous_hash)
+    with unittest.mock.patch.object(Blockchain, 'valid_block',
+                                    return_value=True):
+        block = fx_blockchain.new_block(proof, previous_hash)
     assert isinstance(block.previous_hash, expected)
 
 
@@ -67,7 +69,10 @@ def test_hash(fx_blockchain: Blockchain):
 def test_last_block(fx_blockchain: Blockchain):
     block = fx_blockchain.chain[0]
     assert fx_blockchain.last_block == block
-    new_block = fx_blockchain.new_block(previous_hash=2, proof=10)
+    proof = fx_blockchain.pow(block.proof)
+    previous_hash = fx_blockchain.hash(block)
+    new_block = fx_blockchain.new_block(previous_hash=previous_hash,
+                                        proof=proof)
     assert fx_blockchain.last_block == new_block
 
 
@@ -105,7 +110,11 @@ def test_valid_chain_invalid_hash(fx_blockchain: Blockchain,
 
 
 def test_valid_chain_invalid_proof(fx_blockchain: Blockchain):
-    block = fx_blockchain.new_block(10)
+    last_block = fx_blockchain.last_block
+    last_proof = last_block.proof
+    proof = fx_blockchain.pow(last_proof)
+    previous_hash = fx_blockchain.hash(last_block)
+    block = fx_blockchain.new_block(proof, previous_hash)
     assert len(fx_blockchain.chain) == 2
     assert block.previous_hash == fx_blockchain.hash(fx_blockchain.chain[0])
     with unittest.mock.patch.object(Blockchain, 'valid_proof',
